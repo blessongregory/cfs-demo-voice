@@ -5,6 +5,7 @@ import { SuperannuationBalance } from './SuperannuationBalance';
 import { PersonalDetails } from './PersonalDetails';
 import { SuperAccountCard, PersonalDetailsCard } from './InfoCards';
 import { SuperannuationCard } from './SuperannuationCard';
+import { EmailKeypadModal } from './EmailKeypadModal';
 
 // CFS brand colors
 const colors = {
@@ -145,6 +146,9 @@ export const VoiceAgent = ({
 
   // State to track if job change was mentioned
   const [jobChangeMentioned, setJobChangeMentioned] = useState(false);
+
+  // Add state for email keypad modal
+  const [showEmailKeypadModal, setShowEmailKeypadModal] = useState(false);
 
   // Helper to reveal bot message word by word
   const revealBotMessage = (fullText: string, onDone?: () => void) => {
@@ -365,8 +369,13 @@ export const VoiceAgent = ({
     }
     // --- If in update flow, handle steps ---
     if (updateStep === 'ask_new') {
-      // Use Azure OpenAI slot filling for address/email
-      const slotType = updateType === 'address' ? 'address' : 'email';
+      if (updateType === 'email') {
+        setShowEmailKeypadModal(true);
+        speakResponse('Can you please confirm your email address by typing it in, to make sure that I have captured it correctly?');
+        return;
+      }
+      // Use Azure OpenAI slot filling for address
+      const slotType = 'address';
       try {
         const res = await fetch('/api/slotfill', {
           method: 'POST',
@@ -519,12 +528,12 @@ export const VoiceAgent = ({
   function maybeTriggerChoiceOfFund() {
     if (isAppIdle() && jobChangeMentioned) {
       setJobChangeMentioned(false);
-      setChoiceOfFundStep('offer');
-      setShowChoiceOfFundForm(false);
-      setTranscriptHistory([]);
       setTimeout(() => {
+        setChoiceOfFundStep('offer');
+        setShowChoiceOfFundForm(false);
+        setTranscriptHistory([]);
         speakResponse('I see you have changed jobs. Would you like me to pre-fill a Choice of Fund form for your new employer?');
-      }, 0);
+      }, 5000);
     }
   }
 
@@ -806,7 +815,7 @@ export const VoiceAgent = ({
           </div>
         )}
         {/* Phone screen (white, slightly inset) */}
-        <div className="absolute inset-0 bg-white rounded-[2rem] flex flex-col overflow-hidden m-2 z-10">
+        <div className="absolute inset-2 bg-white rounded-[2rem] flex flex-col overflow-hidden z-10" style={{height: 'calc(100% - 16px)'}}>
           {/* Status Bar */}
           <div className="flex justify-between items-center px-6 py-2 text-sm font-medium" style={{ backgroundColor: colors.red }}>
             <span className="text-white">9:41</span>
@@ -878,6 +887,23 @@ export const VoiceAgent = ({
               <Mic size={32} />
             </button>
           </div>
+          {/* Email Keypad Modal strictly inside the phone screen */}
+          {showEmailKeypadModal && (
+            <div className="absolute left-0 right-0 bottom-0 z-50 pb-3" style={{maxWidth: '100%'}}>
+              <EmailKeypadModal
+                onComplete={(email: string) => {
+                  setNewValue(email);
+                  setShowEmailKeypadModal(false);
+                  const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+                  setOtp(generatedOtp);
+                  setShowOtpPopup(true);
+                  setUpdateStep('waiting_otp');
+                  speakResponse(`I have sent a 6-digit code to your registered mobile number. Please tell me the code to confirm your identity.`);
+                }}
+                onCancel={() => setShowEmailKeypadModal(false)}
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>

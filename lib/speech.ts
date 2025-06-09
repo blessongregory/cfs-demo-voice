@@ -114,17 +114,18 @@ export async function startStreamingRecognition(
 }
 
 export async function synthesizeSpeech(text: string): Promise<Buffer> {
+  const isSSML = /<speak[\s>]/.test(text);
   const request = new ttsProtos.google.cloud.texttospeech.v1.SynthesizeSpeechRequest({
-    input: { text },
+    input: isSSML ? { ssml: text } : { text },
     voice: {
-      languageCode: 'en-US',
-      name: 'en-US-Neural2-J',
-      ssmlGender: ttsProtos.google.cloud.texttospeech.v1.SsmlVoiceGender.MALE,
+      languageCode: 'en-AU',
+      name: 'en-AU-Wavenet-B',
+      ssmlGender: ttsProtos.google.cloud.texttospeech.v1.SsmlVoiceGender.FEMALE,
     },
     audioConfig: {
       audioEncoding: ttsProtos.google.cloud.texttospeech.v1.AudioEncoding.MP3,
-      speakingRate: 1.0,
-      pitch: 0,
+      speakingRate: 0.98,
+      pitch: 0.5,
       volumeGainDb: 0,
       effectsProfileId: ['large-home-entertainment-class-device'],
     },
