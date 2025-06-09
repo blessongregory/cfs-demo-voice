@@ -7,7 +7,7 @@ import { Mic, MicOff, MapPin, Phone, AlertCircle, Volume2, VolumeX } from "lucid
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import Image from "next/image"
 import { VoiceAgent } from '../components/VoiceAgent'
-import { PersonalDetailsCard, SuperannuationBalanceCard } from '../components/InfoCards'
+import { PersonalDetailsCard } from '../components/InfoCards'
 
 interface Message {
   id: number
@@ -68,6 +68,16 @@ export default function Home() {
   }, [messages, showAddressCard, isTyping])
 
   const speakText = async (text: string) => {
+    console.log('Text received by speakText (raw):', text);
+    const processedText = text.trim(); // Trim whitespace
+    console.log('Text received by speakText (processed):', processedText);
+
+    // Only proceed if the processed text is not empty
+    if (!processedText) {
+      console.warn('speakText received empty or whitespace-only text, skipping synthesis.');
+      return;
+    }
+
     try {
       setIsSpeaking(true)
       const response = await fetch('/api/speech', {
@@ -77,7 +87,7 @@ export default function Home() {
         },
         body: JSON.stringify({
           type: 'synthesize',
-          data: text,
+          data: processedText, // Send the processed text
         }),
       })
 
@@ -349,14 +359,22 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4">
-      <div className="max-w-sm mx-auto">
-        <VoiceAgent
-          onUpdateAddress={handleUpdateAddress}
-          onUpdateEmail={handleUpdateEmail}
-          onRequestBalance={handleRequestBalance}
-          onRequestPersonalDetails={handleRequestPersonalDetails}
-        />
+    <main className="min-h-screen bg-gray-50">
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div>
+            <Card className="mb-8">
+              <CardContent className="p-6">
+                <VoiceAgent
+                  onUpdateAddress={handleUpdateAddress}
+                  onUpdateEmail={handleUpdateEmail}
+                  onRequestBalance={handleRequestBalance}
+                  onRequestPersonalDetails={handleRequestPersonalDetails}
+                />
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     </main>
   )
