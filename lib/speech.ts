@@ -44,7 +44,7 @@ const speechConfig = new protos.google.cloud.speech.v1.RecognitionConfig({
   languageCode: 'en-US',
   model: 'latest_long',
   useEnhanced: true,
-  enableAutomaticPunctuation: true
+  enableAutomaticPunctuation: true,
   enableSpokenPunctuation: true,
   enableSpokenEmojis: false,
   maxAlternatives: 1,
