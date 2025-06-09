@@ -4,7 +4,23 @@ import path from 'path';
 import fs from 'fs';
 
 // Debug: Log the current working directory and check if credentials file exists
-const credentialsPath = path.join(process.cwd(), 'google-credentials.json');
+let credentialsPath: string;
+if (process.env.VERCEL) {
+  // On Vercel, use /tmp and write the env var to a file
+  credentialsPath = '/tmp/google-credentials.json';
+  if (!fs.existsSync(credentialsPath)) {
+    const creds = process.env.GOOGLE_CREDENTIALS_JSON;
+    if (creds) {
+      fs.writeFileSync(credentialsPath, creds);
+    } else {
+      throw new Error('GOOGLE_CREDENTIALS_JSON env variable not set');
+    }
+  }
+} else {
+  // Local dev
+  credentialsPath = path.join(process.cwd(), 'google-credentials.json');
+}
+
 console.log('Current working directory:', process.cwd());
 console.log('Looking for credentials at:', credentialsPath);
 console.log('Credentials file exists:', fs.existsSync(credentialsPath));
