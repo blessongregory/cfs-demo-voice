@@ -44,9 +44,9 @@ const speechConfig = new protos.google.cloud.speech.v1.RecognitionConfig({
   languageCode: 'en-US',
   model: 'latest_long',
   useEnhanced: true,
-  enableAutomaticPunctuation: { value: true },
-  enableSpokenPunctuation: { value: true },
-  enableSpokenEmojis: { value: false },
+  enableAutomaticPunctuation: true
+  enableSpokenPunctuation: true,
+  enableSpokenEmojis: false,
   maxAlternatives: 1,
   speechContexts: [{
     phrases: ['CFS', 'Chronic Fatigue Syndrome', 'ME', 'Myalgic Encephalomyelitis'],
