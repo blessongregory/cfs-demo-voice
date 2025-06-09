@@ -41,17 +41,18 @@ export async function POST(request: Request) {
       }
       console.log('Text being sent to Google TTS for synthesis:', textToSynthesize);
 
+      const isSSML = /<speak[\s>]/.test(textToSynthesize);
       const ttsRequest = {
-        input: { text: textToSynthesize },
+        input: isSSML ? { ssml: textToSynthesize } : { text: textToSynthesize },
         voice: {
-          languageCode: 'en-US',
-          name: 'en-US-Neural2-J',
-          ssmlGender: 'MALE' as const,
+          languageCode: 'en-AU',
+          name: 'en-AU-Wavenet-B',
+          ssmlGender: 'FEMALE' as const,
         },
         audioConfig: {
           audioEncoding: 'MP3' as const,
-          speakingRate: 1.0,
-          pitch: 0,
+          speakingRate: 0.98,
+          pitch: 0.5,
         },
       };
 
